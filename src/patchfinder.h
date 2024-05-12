@@ -16,5 +16,5 @@ uint64_t find_trustcache(jake_img_t syms);
 uint64_t find_swapprefix(jake_img_t syms);
 uint64_t find_realhost(jake_img_t syms);
 uint64_t find_zonemap(jake_img_t syms);
-#define P_LOG_DBG(fmt, args ...) LOG(fmt,##args)
+#define P_LOG_DBG(fmt, args ...) LIBJAKE_LOG(fmt,##args)
 #endif

@@ -18,7 +18,7 @@ int jake_init_image(jake_img_t img, const char *path)
 
     if (access(path, F_OK) != 0)
     {
-        LOG("Could not find file '%s'", path);
+        LIBJAKE_LOG("Could not find file '%s'", path);
         goto fail;
     }
 
@@ -28,7 +28,7 @@ int jake_init_image(jake_img_t img, const char *path)
     ret = stat(img->path, &s);
     if (ret != 0)
     {
-        LOG("Failed to stat file '%s'", img->path);
+        LIBJAKE_LOG("Failed to stat file '%s'", img->path);
         goto fail;
     }
 
@@ -36,14 +36,14 @@ int jake_init_image(jake_img_t img, const char *path)
 
     if (img->filesize < 100)
     {
-        LOG("Filesize too small: %zu bytes", img->filesize);
+        LIBJAKE_LOG("Filesize too small: %zu bytes", img->filesize);
         goto fail;
     }
 
     img->filedesc = open(img->path, O_RDONLY);
     if (img->filedesc < 0)
     {
-        LOG("Failed to open the image");
+        LIBJAKE_LOG("Failed to open the image");
         goto fail;
     }
 
@@ -63,21 +63,21 @@ int jake_init_image(jake_img_t img, const char *path)
         img->filehandle = file_open(img->path, O_RDONLY);
         if (img->filehandle == NULL)
         {
-            LOG("Failed to open img4 file");
+            LIBJAKE_LOG("Failed to open img4 file");
             goto fail;
         }
 
         img->filehandle = img4_reopen(img->filehandle, NULL, 0);
         if (img->filehandle == NULL)
         {
-            LOG("Failed to open img4");
+            LIBJAKE_LOG("Failed to open img4");
             goto fail;
         }
 
         ret = img->filehandle->ioctl(img->filehandle, IOCTL_MEM_GET_DATAPTR, &img->map, &img->mapsize);
         if (ret != 0)
         {
-            LOG("Failed to map img4");
+            LIBJAKE_LOG("Failed to map img4");
             goto fail;
         }
     }
@@ -87,13 +87,13 @@ int jake_init_image(jake_img_t img, const char *path)
         img->map = mmap(NULL, img->filesize, PROT_READ, MAP_PRIVATE, img->filedesc, 0);
         if (img->map == MAP_FAILED)
         {
-            LOG("Failed to map image");
+            LIBJAKE_LOG("Failed to map image");
             goto fail;
         }
     }
     else
     {
-        LOG("Unknown file type! Magic: %x", file_magic);
+        LIBJAKE_LOG("Unknown file type! Magic: %x", file_magic);
         goto fail;
     }
 
@@ -121,14 +121,14 @@ int jake_init_image(jake_img_t img, const char *path)
 
     if (tag->tagNumber != kASN1TagSEQUENCE)
     {
-        LOG("not a sequence");
+        LIBJAKE_LOG("not a sequence");
     }
     else
     {
-        LOG("is a sequence");
+        LIBJAKE_LOG("is a sequence");
     
         asn1Length *length = (asn1Length *)tag++;
-        LOG("length = %d %d", length->len, length->isLong);
+        LIBJAKE_LOG("length = %d %d", length->len, length->isLong);
 
         asn1ElemLen elemLen = {
             .dataLen = length->len,
@@ -136,13 +136,13 @@ int jake_init_image(jake_img_t img, const char *path)
         };
 
         asn1Tag *tag2 = (asn1Tag *)tag++;
-        LOG("tagNumber = %x", tag2->tagNumber);
+        LIBJAKE_LOG("tagNumber = %x", tag2->tagNumber);
         if ((tag2->tagNumber  | kASN1TagIA5String) == 0)
         {
-            LOG("not a string");
+            LIBJAKE_LOG("not a string");
             goto fail;
         }
-        else LOG("is a string");
+        else LIBJAKE_LOG("is a string");
     }
 #endif 
 
@@ -163,7 +163,7 @@ int jake_init_image(jake_img_t img, const char *path)
             break;
 
         default: 
-            LOG("Unknown magic: %x", magic);
+            LIBJAKE_LOG("Unknown magic: %x", magic);
             goto fail;
     }
 
@@ -179,7 +179,7 @@ int jake_init_image(jake_img_t img, const char *path)
     
         if ((uintptr_t)cmd > (uintptr_t)img->map + img->filesize)
         {
-            LOG("Load commands are out of bounds! Last command size: %x", cmd->cmdsize);
+            LIBJAKE_LOG("Load commands are out of bounds! Last command size: %x", cmd->cmdsize);
             goto fail;
         }
     }
@@ -277,7 +277,7 @@ int jake_find_symtab(jake_img_t img)
 
     if (img->symtab_cmd == NULL)
     {
-        LOG("Failed to find symtab command.");
+        LIBJAKE_LOG("Failed to find symtab command.");
         return -1;
     }
 
